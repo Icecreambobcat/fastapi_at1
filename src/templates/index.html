@@ -1,0 +1,54 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Ratings</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8">Movie Ratings</h1>
+        
+        <!-- Search Form -->
+        <form action="/search" method="get" class="mb-8">
+            <div class="flex gap-4">
+                <input type="text" name="query" required
+                    class="flex-grow p-2 border rounded shadow-sm"
+                    placeholder="Search for a movie...">
+                <button type="submit"
+                    class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                    Search
+                </button>
+            </div>
+        </form>
+
+        <!-- Movie List -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {% for movie in movies %}
+            <div class="bg-white p-4 rounded-lg shadow">
+                <div class="flex gap-4">
+                    {% if movie.poster_path %}
+                    <img src="{{ movie.poster_path }}" alt="{{ movie.title }}"
+                        class="w-24 h-36 object-cover rounded">
+                    {% endif %}
+                    <div>
+                        <h2 class="text-xl font-semibold">{{ movie.title }}</h2>
+                        {% if movie.year %}
+                        <p class="text-gray-600">{{ movie.year }}</p>
+                        {% endif %}
+                        <div class="mt-2">
+                            <span class="text-yellow-500 text-lg">
+                                {% for _ in range(movie.rating) %}★{% endfor %}
+                                {% for _ in range(5 - movie.rating) %}☆{% endfor %}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

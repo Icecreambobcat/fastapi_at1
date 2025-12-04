@@ -1,0 +1,59 @@
+<!-- templates/search_results.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - {{ query }}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="mb-8">
+            <a href="/" class="text-blue-500 hover:underline">← Back to Home</a>
+        </div>
+        
+        <h1 class="text-3xl font-bold mb-8">Search Results for "{{ query }}"</h1>
+
+        <div class="grid grid-cols-1 gap-6">
+            {% for movie in movies %}
+            <div class="bg-white p-4 rounded-lg shadow">
+                <div class="flex gap-4">
+                    {% if movie.poster_path %}
+                    <img src="{{ movie.poster_path }}" alt="{{ movie.title }}"
+                        class="w-24 h-36 object-cover rounded">
+                    {% endif %}
+                    <div class="flex-grow">
+                        <h2 class="text-xl font-semibold">{{ movie.title }}</h2>
+                        {% if movie.year %}
+                        <p class="text-gray-600">{{ movie.year }}</p>
+                        {% endif %}
+                        <form action="/add-movie" method="post" class="mt-4">
+                            <input type="hidden" name="movie_id" value="{{ movie.id }}">
+                            <input type="hidden" name="title" value="{{ movie.title }}">
+                            <input type="hidden" name="year" value="{{ movie.year }}">
+                            <input type="hidden" name="poster_path" value="{{ movie.poster_path }}">
+                            <div class="flex items-center gap-4">
+                                <select name="rating" required
+                                    class="p-2 border rounded">
+                                    <option value="">Select Rating</option>
+                                    <option value="1">1 Star</option>
+                                    <option value="2">2 Stars</option>
+                                    <option value="3">3 Stars</option>
+                                    <option value="4">4 Stars</option>
+                                    <option value="5">5 Stars</option>
+                                </select>
+                                <button type="submit"
+                                    class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                                    Add to My Movies
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
