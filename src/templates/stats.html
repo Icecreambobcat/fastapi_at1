@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Statistics</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-3xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6">Review Statistics</h1>
+
+        <!-- Stats Overview -->
+        <div class="bg-white p-6 rounded-lg shadow mb-8">
+            <h2 class="text-xl font-semibold mb-4">Summary</h2>
+            <p class="text-gray-700">Total movies reviewed: <strong>{{ stats.total }}</strong></p>
+            <p class="text-gray-700">Average rating: 
+                {% if stats.avg_rating %}
+                    <strong>{{ stats.avg_rating }}</strong> / 5
+                {% else %}
+                    No ratings yet.
+                {% endif %}
+            </p>
+            <p class="text-gray-700">
+                Average release year:
+                {% if stats.avg_year %}
+                    <strong>{{ stats.avg_year }}</strong>
+                {% else %}
+                    No year data.
+                {% endif %}
+            </p>
+
+            <p class="text-gray-700">
+                Most common release year:
+                {% if stats.most_common_year %}
+                    <strong>{{ stats.most_common_year }}</strong>
+                {% else %}
+                    No year data.
+                {% endif %}
+            </p>
+        </div>
+
+        <!-- Distribution -->
+        <div class="bg-white p-6 rounded-lg shadow">
+            <h2 class="text-xl font-semibold mb-4">Ratings Breakdown</h2>
+
+            {% if stats.total == 0 %}
+                <p>No reviews yet.</p>
+            {% else %}
+                <ul class="space-y-2">
+                    {% for rating in range(1, 6) %}
+                    <li class="flex items-center justify-between">
+                        <span class="font-medium">{{ rating }} star{{ 's' if rating != 1 else '' }}:</span>
+                        <span>{{ stats.distribution.get(rating, 0) }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <a href="/" class="inline-block mt-8 text-blue-500 hover:underline">← Back to Home</a>
+    </div>
+</body>
+</html>
+

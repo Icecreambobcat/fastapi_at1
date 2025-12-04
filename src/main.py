@@ -6,15 +6,18 @@ from fastapi.staticfiles import StaticFiles
 import httpx
 import os
 from dotenv import load_dotenv
+from openai import OpenAI
 
 # TODO: Local module imports
 from services.database import (
     Movie,
     init_db,
     get_all_movies,
+    get_movie_by_id,
     add_movie_to_db,
     drop_movie_from_db,
     update_movie_rating,
+    get_review_stats,
 )
 
 # NOTE: SECTION: setup
@@ -52,6 +55,7 @@ if not OPENAI_API_KEY:
     raise ValueError(
         "OPENAI_API_KEY not found in environment variables. Please set it in your .env file or environment."
     )
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 
 # NOTE: SECTION: routes
@@ -60,6 +64,92 @@ async def root(request: Request):
     movies = get_all_movies()
     return templates.TemplateResponse(
         "index.html", {"request": request, "movies": movies}
+    )
+
+
+@app.get("/recommend")
+async def recommend_page(request: Request):
+    return templates.TemplateResponse(
+        "recommend.html",
+        {"request": request, "recommendations": None, "loading": False},
+    )
+
+
+@app.post("/recommend/generate")
+async def recommend_generate(request: Request):
+    movies = get_all_movies()
+    stats = get_review_stats()
+
+    # Prepare compact input summary
+    movie_list_text = "\n".join(
+        [f"- {m.title} ({m.year}) — rated {m.rating}/5" for m in movies]
+    )
+
+    stats_text = (
+        f"Total movies: {stats['total']}\n"
+        f"Average rating: {stats['avg_rating']}\n"
+        f"Average year: {stats['avg_year']}\n"
+        f"Most common year: {stats['most_common_year']}\n"
+        f"Rating distribution: {stats['distribution']}"
+    )
+
+    prompt = f"""
+You are an expert movie curator AI.
+Using the user's movie database and statistics, produce 3–5 personalised movie recommendations.
+
+Database movies:
+{movie_list_text}
+
+Stats:
+{stats_text}
+
+Respond in clean bullet points with:
+- Movie title
+- Year
+- Why it fits the user's tastes
+- No extra explanations
+"""
+
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4.1-mini",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful movie recommendation AI.",
+                },
+                {"role": "user", "content": prompt},
+            ],
+        )
+
+        ai_text = response.choices[0].message.content
+
+    except Exception as e:
+        ai_text = f"Error generating recommendations: {str(e)}"
+
+    return templates.TemplateResponse(
+        "recommend.html",
+        {"request": request, "recommendations": ai_text, "loading": False},
+    )
+
+
+@app.get("/movie/{movie_id}")
+async def movie_detail(request: Request, movie_id: int):
+    """Display detailed view of a single movie."""
+    movie = get_movie_by_id(movie_id)
+    if not movie:
+        raise HTTPException(status_code=404, detail="Movie not found")
+
+    return templates.TemplateResponse(
+        "movie_detail.html", {"request": request, "movie": movie}
+    )
+
+
+@app.get("/stats")
+async def stats_page(request: Request):
+    stats = get_review_stats()
+    return templates.TemplateResponse(
+        "stats.html", {"request": request, "stats": stats}
     )
 
 

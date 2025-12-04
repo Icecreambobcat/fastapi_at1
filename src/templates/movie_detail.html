@@ -1,0 +1,109 @@
+<!-- templates/movie_detail.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ movie.title }} - Movie Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="mb-8">
+            <a href="/" class="text-blue-500 hover:underline">← Back to Home</a>
+        </div>
+        
+        <div class="bg-white p-8 rounded-lg shadow-lg">
+            <div class="flex flex-col md:flex-row gap-8">
+                <!-- Movie Poster -->
+                {% if movie.poster_path %}
+                <div class="flex-shrink-0">
+                    <img src="{{ movie.poster_path }}" alt="{{ movie.title }}"
+                        class="w-64 h-96 object-cover rounded-lg shadow-md">
+                </div>
+                {% endif %}
+                
+                <!-- Movie Information -->
+                <div class="flex-grow">
+                    <h1 class="text-4xl font-bold mb-2">{{ movie.title }}</h1>
+                    {% if movie.year %}
+                    <p class="text-gray-600 text-xl mb-4">{{ movie.year }}</p>
+                    {% endif %}
+                    
+                    <!-- Current Rating Display -->
+                    {% if movie.rating %}
+                    <div class="mb-6">
+                        <h2 class="text-lg font-semibold mb-2">Current Rating:</h2>
+                        <div class="text-yellow-500 text-3xl">
+                            {% for _ in range(movie.rating) %}★{% endfor %}
+                            {% for _ in range(5 - movie.rating) %}☆{% endfor %}
+                        </div>
+                        <p class="text-gray-600 mt-1">{{ movie.rating }} out of 5 stars</p>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Rating Actions -->
+                    <div class="space-y-4 mt-8">
+                        {% if movie.rating %}
+                        <!-- Update Rating Form -->
+                        <div class="border-t pt-4">
+                            <h3 class="text-lg font-semibold mb-3">Update Rating:</h3>
+                            <form action="/update-rating" method="post" class="flex items-center gap-4">
+                                <input type="hidden" name="movie_id" value="{{ movie.id }}">
+                                <select name="rating" required
+                                    class="p-2 border rounded shadow-sm">
+                                    <option value="">Select New Rating</option>
+                                    <option value="1" {% if movie.rating == 1 %}selected{% endif %}>1 Star</option>
+                                    <option value="2" {% if movie.rating == 2 %}selected{% endif %}>2 Stars</option>
+                                    <option value="3" {% if movie.rating == 3 %}selected{% endif %}>3 Stars</option>
+                                    <option value="4" {% if movie.rating == 4 %}selected{% endif %}>4 Stars</option>
+                                    <option value="5" {% if movie.rating == 5 %}selected{% endif %}>5 Stars</option>
+                                </select>
+                                <button type="submit"
+                                    class="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition">
+                                    Update Rating
+                                </button>
+                            </form>
+                        </div>
+                        
+                        <!-- Remove Movie Form -->
+                        <div class="border-t pt-4">
+                            <h3 class="text-lg font-semibold mb-3">Remove from Collection:</h3>
+                            <form action="/remove-movie" method="post" 
+                                onsubmit="return confirm('Are you sure you want to remove this movie from your collection?');">
+                                <input type="hidden" name="movie_id" value="{{ movie.id }}">
+                                <button type="submit"
+                                    class="px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition">
+                                    Remove Movie
+                                </button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <!-- Add Rating Form (if movie exists but has no rating) -->
+                        <div class="border-t pt-4">
+                            <h3 class="text-lg font-semibold mb-3">Add Rating:</h3>
+                            <form action="/add-movie" method="post" class="flex items-center gap-4">
+                                <input type="hidden" name="movie_id" value="{{ movie.id }}">
+                                <select name="rating" required
+                                    class="p-2 border rounded shadow-sm">
+                                    <option value="">Select Rating</option>
+                                    <option value="1">1 Star</option>
+                                    <option value="2">2 Stars</option>
+                                    <option value="3">3 Stars</option>
+                                    <option value="4">4 Stars</option>
+                                    <option value="5">5 Stars</option>
+                                </select>
+                                <button type="submit"
+                                    class="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition">
+                                    Add Rating
+                                </button>
+                            </form>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
